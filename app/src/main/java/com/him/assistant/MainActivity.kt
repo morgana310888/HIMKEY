@@ -1,4 +1,3 @@
-
 package com.him.assistant
 
 import android.os.Bundle
@@ -23,14 +22,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.him.assistant.ui.theme.AssistantTheme
-
-data class Message(
-    val text: String,
-    val fromHim: Boolean
-)
+import com.him.assistant.viewmodel.ChatViewModel
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -44,20 +41,15 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun HIMScreen() {
-
+fun HIMScreen(
+    viewModel: ChatViewModel = viewModel()
+) {
     var messageText by remember {
         mutableStateOf("")
     }
 
-    val messages = remember {
-        mutableStateListOf(
-            Message(
-                "Oi. Eu sou o HIM. Estou aqui. 👋",
-                true
-            )
-        )
-    }
+    val messages by viewModel.messages.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize()
@@ -86,7 +78,6 @@ fun HIMScreen() {
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-
                 items(messages) { message ->
 
                     Text(
@@ -97,6 +88,15 @@ fun HIMScreen() {
                         },
                         style = MaterialTheme.typography.bodyLarge
                     )
+                }
+
+                if (isLoading) {
+                    item {
+                        Text(
+                            text = "HIM está pensando...",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
             }
 
@@ -117,24 +117,11 @@ fun HIMScreen() {
                 )
 
                 Button(
+                    enabled = !isLoading,
                     onClick = {
 
                         if (messageText.isNotBlank()) {
-
-                            messages.add(
-                                Message(
-                                    messageText,
-                                    false
-                                )
-                            )
-
-                            messages.add(
-                                Message(
-                                    "Recebi sua mensagem. Ainda estou sendo desenvolvido, mas já estou aqui. 😉",
-                                    true
-                                )
-                            )
-
+                            viewModel.sendMessage(messageText)
                             messageText = ""
                         }
                     }
