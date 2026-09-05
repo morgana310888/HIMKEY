@@ -78,6 +78,7 @@ fun HIMScreen(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+
                 items(messages) { message ->
 
                     Text(
@@ -119,7 +120,6 @@ fun HIMScreen(
                 Button(
                     enabled = !isLoading,
                     onClick = {
-
                         if (messageText.isNotBlank()) {
                             viewModel.sendMessage(messageText)
                             messageText = ""
